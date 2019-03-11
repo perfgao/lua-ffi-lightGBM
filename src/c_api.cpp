@@ -23,7 +23,7 @@
 #include <mutex>
 #include <functional>
 
-#include "./application/predictor.hpp"
+#include <LightGBM/predictor.hpp>
 
 namespace LightGBM {
 
