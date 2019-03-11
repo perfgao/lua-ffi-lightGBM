@@ -167,6 +167,7 @@ file(GLOB SOURCES
     src/objective/*.cpp
     src/network/*.cpp
     src/treelearner/*.cpp
+    src/lua/*.cpp
 )
 
 add_executable(lightgbm src/main.cpp ${SOURCES})
