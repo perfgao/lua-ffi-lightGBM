@@ -11,7 +11,6 @@
 #include <LightGBM/prediction_early_stop.h>
 #include <LightGBM/metric.h>
 
-#include "predictor.hpp"
 
 #include <LightGBM/utils/openmp_wrapper.h>
 
@@ -26,6 +25,17 @@
 #include <vector>
 
 namespace LightGBM {
+Application::Application(const char *model_filename)
+{
+    this->input_model = std::string(model_filename);
+
+    // set number of threads for openmp
+    if (config_.num_threads > 0) {
+        omp_set_num_threads(config_.num_threads);
+    }
+
+    omp_set_nested(0);
+}
 
 Application::Application(int argc, char** argv) {
   LoadParameters(argc, argv);
@@ -261,5 +271,21 @@ void Application::ConvertModel() {
   boosting_->SaveModelToIfElse(-1, config_.convert_model.c_str());
 }
 
+
+void Application::InitPredictOnline() {
+    boosting_.reset(
+        Boosting::CreateBoosting("gbdt", this->input_model.c_str()));
+
+    //create predictor
+    predictor_online = std::unique_ptr<Predictor>(new Predictor(boosting_.get(),
+                config_.num_iteration_predict, config_.predict_raw_score,
+                config_.predict_leaf_index, config_.predict_contrib,
+                config_.pred_early_stop, config_.pred_early_stop_freq,
+                config_.pred_early_stop_margin));
+}
+
+void Application::PredictOnline(std::vector<std::pair<int, double>>& oneline_features, double *result) {
+    predictor_online->Predict(oneline_features, result);
+}
 
 }  // namespace LightGBM

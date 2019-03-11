@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <memory>
+#include <LightGBM/predictor.hpp>
 
 namespace LightGBM {
 
@@ -26,11 +27,18 @@ class Application {
  public:
   Application(int argc, char** argv);
 
+  /*! \brief Constructor by model-filename */
+  Application(const char *model_filename);
+
   /*! \brief Destructor */
   ~Application();
 
   /*! \brief To call this funciton to run application*/
   inline void Run();
+
+  void InitPredictOnline();
+
+  void PredictOnline(std::vector<std::pair<int, double>>& oneline_features, double *result);
 
  private:
   /*! \brief Load parameters from command line and config file*/
@@ -68,6 +76,10 @@ class Application {
   std::unique_ptr<Boosting> boosting_;
   /*! \brief Training objective function */
   std::unique_ptr<ObjectiveFunction> objective_fun_;
+
+  std::string input_model ;
+
+  std::unique_ptr<Predictor> predictor_online;
 };
 
 
